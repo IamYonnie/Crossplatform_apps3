@@ -7,7 +7,6 @@
     
     <style>
         .a-scene video {
-            object-fit: contain !important;
             width: 100vw !important;
             height: 100vh !important;
             left: 0 !important;
@@ -39,10 +38,10 @@
         <a-camera active="false" position="0 0 0"></a-camera>
 
         <a-entity mindar-face-target="anchorIndex: 10">
-            <a-gltf-model rotation="0 93 10" 
-                          position="0.03 -1.2 -0.22" 
-                          scale="0.25 0.28 0.25" 
-                          src="#maskModel"></a-gltf-model>
+            <a-entity gltf-model="#maskModel"
+                      rotation="0 93 10" 
+                      position="0.03 -1.2 -0.22" 
+                      scale="0.25 0.28 0.25"></a-entity>
         </a-entity>
     </a-scene>
 
