@@ -1,46 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        .a-scene {
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-        .a-scene video {
-            width: 100vw !important;
-            height: 100vh !important;
-            left: 0 !important;
-            top: 0 !important;
-            position: absolute !important;
-            object-fit: cover !important;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MindAR Face Tracking — Красный куб</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: system-ui, sans-serif;
+    }
+    #hud {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
-    <a-scene mindar-face embedded color-space="sRGB"
-             renderer="colorManagement: true, physicallyCorrectLights"
-             vr-mode-ui="enabled: false"
-             fullscreen-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
-        
-        <a-camera active="false" position="0 0 0"></a-camera>
 
-        <a-entity mindar-face-target="anchorIndex: 10">
-            <!-- Красный куб вместо маски. Размер подобран под лицо. -->
-            <a-box color="red" 
-                   rotation="0 0 0" 
-                   position="0 0 0" 
-                   scale="0.2 0.2 0.2"></a-box>
-        </a-entity>
-    </a-scene>
+  <div id="hud">Наведите камеру на лицо — появится красный куб</div>
+
+  <a-scene
+    mindar-face="autoStart: true; uiLoading: no; uiScanning: no; uiError: no;"
+    embedded
+    renderer="antialias: true; alpha: true; colorManagement: true;"
+    color-space="sRGB"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+
+    <a-camera
+      active="true"
+      position="0 0 0"
+      look-controls="enabled: false"
+      wasd-controls="enabled: false"
+    ></a-camera>
+
+    <a-entity mindar-face-target="anchorIndex: 168">
+
+      <a-box
+        id="redCube"
+        color="#ff2222"
+        width="0.1"
+        height="0.1"
+        depth="0.1"
+        position="0 0 0.12"
+        rotation="0 0 0"
+        material="color: #ff2222; metalness: 0.2; roughness: 0.6;"
+        shadow="cast: true"
+      ></a-box>
+
+      <a-entity light="type: ambient; intensity: 0.9"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6; position: 1 2 1"></a-entity>
+
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const sceneEl = document.querySelector('a-scene');
+    const cube = document.getElementById('redCube');
+
+    let smoothed = null;
+    const ALPHA = 0.25;
+
+    sceneEl.addEventListener('loaded', () => {
+      setTimeout(() => {
+        console.log('[MindAR] face tracking готов');
+      }, 800);
+    });
+
+    function smooth() {
+      if (cube && cube.object3D) {
+        const current = cube.object3D.position.clone();
+
+        if (!smoothed) {
+          smoothed = current.clone();
+        } else {
+          smoothed.x = smoothed.x + ALPHA * (current.x - smoothed.x);
+          smoothed.y = smoothed.y + ALPHA * (current.y - smoothed.y);
+          smoothed.z = smoothed.z + ALPHA * (current.z - smoothed.z);
+
+          cube.object3D.position.copy(smoothed);
+        }
+      }
+      requestAnimationFrame(smooth);
+    }
+    requestAnimationFrame(smooth);
+
+    sceneEl.addEventListener('arError', (e) => {
+      console.error('[MindAR] Ошибка AR:', e);
+      alert('Не удалось получить доступ к камере. Разрешите доступ и обновите страницу.');
+    });
+  </script>
 </body>
 </html>
