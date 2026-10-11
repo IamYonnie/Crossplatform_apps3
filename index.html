@@ -12,37 +12,21 @@
              device-orientation-permission-ui="enabled: false">
         
         <a-assets>
-            <!-- ЗАМЕНИТЕ src НА ВАШ ПУТЬ -->
-            <!-- Если у вас .glb, пишите .glb. Если .gltf, пишите .gltf -->
             <a-asset-item id="maskModel" src="japanese_demon_mask/scene.gltf"></a-asset-item>
             
-            <!-- Occluder (голова), чтобы маска не просвечивала насквозь. 
-                 Ссылка на официальный occluder от MindAR -->
             <a-asset-item id="headOccluder" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
         </a-assets>
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
-        <!-- 
-            anchorIndex: 10 — это точка на лбу. Для маски лучше всего подходит.
-            Если маска должна быть на все лицо, попробуйте anchorIndex: 1 (кончик носа) или 168 (между глаз).
-        -->
+        <!-- anchorIndex: 10 — точка на лбу (для маски) -->
         <a-entity mindar-face-target="anchorIndex: 10">
-            <!-- 
-                Occluder должен быть ПЕРВЫМ, чтобы перекрывать модель.
-                scale и position для occluder нужно подбирать под вашу голову.
-            -->
             <a-gltf-model mindar-face-occluder 
                           position="0 -0.3 0.15" 
                           rotation="0 0 0" 
                           scale="0.065 0.065 0.065" 
                           src="#headOccluder"></a-gltf-model>
 
-            <!-- 
-                Сама маска. 
-                rotation, position, scale — САМЫЕ ВАЖНЫЕ ПАРАМЕТРЫ. 
-                Начните с scale="0.01 0.01 0.01".
-            -->
             <a-gltf-model rotation="0 93 10" 
                           position="0.03 -1.2 -0.22" 
                           scale="0.25 0.28 0.25" 
