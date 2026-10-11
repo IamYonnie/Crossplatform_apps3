@@ -1,214 +1,36 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MindAR Face Tracking — красный куб</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #111;
-            color: #fff;
-        }
-        #ar-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        #info {
-            position: absolute;
-            bottom: 16px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            pointer-events: none;
-            font-size: 14px;
-            text-shadow: 0 0 6px black;
-            z-index: 10;
-        }
-        #error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(200, 0, 0, 0.85);
-            padding: 20px 30px;
-            border-radius: 12px;
-            font-size: 18px;
-            display: none;
-            z-index: 100;
-            max-width: 80%;
-            text-align: center;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
 </head>
 <body>
-    <div id="ar-container"></div>
-    <div id="info">Наведите камеру на лицо — красный куб появится на лбу</div>
-    <div id="error-message">Не удалось получить доступ к камере. Разрешите доступ и обновите страницу.</div>
+    <a-scene mindar-face embedded color-space="sRGB"
+             renderer="colorManagement: true, physicallyCorrectLights"
+             vr-mode-ui="enabled: false"
+             device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <a-asset-item id="headOccluder" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
+        </a-assets>
 
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+        <a-camera active="false" position="0 0 0"></a-camera>
 
-    <script>
-        window.addEventListener('load', function () {
-            const sceneEl = document.createElement('a-scene');
-            sceneEl.setAttribute('mindar-face', 'autoStart: true; uiLoading: no; uiScanning: no; uiError: no; maxTrack: 1;');
-            sceneEl.setAttribute('embedded', '');
-            sceneEl.setAttribute('renderer', 'alpha: true; antialias: true; colorManagement: true; physicallyCorrectLights: true;');
-            sceneEl.setAttribute('background', 'transparent: true;');
+        <a-entity mindar-face-target="anchorIndex: 10">
 
-            const video = document.createElement('video');
-            video.setAttribute('id', 'ar-video');
-            video.setAttribute('autoplay', '');
-            video.setAttribute('muted', '');
-            video.setAttribute('playsinline', '');
-            video.style.position = 'absolute';
-            video.style.top = '0';
-            video.style.left = '0';
-            video.style.width = '100%';
-            video.style.height = '100%';
-            video.style.objectFit = 'cover';
-            video.style.zIndex = '-2';
-            document.getElementById('ar-container').appendChild(video);
+            <a-gltf-model mindar-face-occluder 
+                          position="0 -0.3 0.15" 
+                          rotation="0 0 0" 
+                          scale="0.065 0.065 0.065" 
+                          src="#headOccluder"></a-gltf-model>
 
-            const assets = document.createElement('a-assets');
-            sceneEl.appendChild(assets);
+            <a-box rotation="0 93 10" 
+                   position="0.03 -1.2 -0.22" 
+                   scale="20 20 20" 
+                   color="#ff3333"></a-box>
 
-            const camera = document.createElement('a-camera');
-            camera.setAttribute('position', '0 0 0');
-            camera.setAttribute('look-controls', 'enabled: false');
-            camera.setAttribute('wasd-controls', 'enabled: false');
-            sceneEl.appendChild(camera);
-
-            const faceAnchor = document.createElement('a-entity');
-            faceAnchor.setAttribute('mindar-face-target', 'anchorIndex: 168;');
-            faceAnchor.setAttribute('position', '0 0 0');
-            faceAnchor.setAttribute('rotation', '0 0 0');
-            faceAnchor.setAttribute('scale', '1 1 1');
-
-            const cube = document.createElement('a-box');
-            cube.setAttribute('color', '#ff2222');
-            cube.setAttribute('width', '0.12');
-            cube.setAttribute('height', '0.12');
-            cube.setAttribute('depth', '0.12');
-            cube.setAttribute('position', '0 0.08 -0.02');
-            cube.setAttribute('rotation', '0 0 0');
-            cube.setAttribute('material', 'color: #ff2222; metalness: 0.3; roughness: 0.5; emissive: #440000; emissiveIntensity: 0.4;');
-            cube.setAttribute('shadow', 'cast: true; receive: false;');
-
-            const cubeGlow = document.createElement('a-sphere');
-            cubeGlow.setAttribute('color', '#ff0000');
-            cubeGlow.setAttribute('radius', '0.09');
-            cubeGlow.setAttribute('position', '0 0.08 -0.02');
-            cubeGlow.setAttribute('material', 'color: #ff0000; opacity: 0.15; transparent: true; side: double; depthWrite: false;');
-            cubeGlow.setAttribute('visible', 'true');
-
-            const cubeWire = document.createElement('a-box');
-            cubeWire.setAttribute('color', '#ffffff');
-            cubeWire.setAttribute('width', '0.122');
-            cubeWire.setAttribute('height', '0.122');
-            cubeWire.setAttribute('depth', '0.122');
-            cubeWire.setAttribute('position', '0 0.08 -0.02');
-            cubeWire.setAttribute('material', 'color: #ffffff; wireframe: true; opacity: 0.35; transparent: true;');
-            cubeWire.setAttribute('visible', 'true');
-
-            faceAnchor.appendChild(cube);
-            faceAnchor.appendChild(cubeGlow);
-            faceAnchor.appendChild(cubeWire);
-            sceneEl.appendChild(faceAnchor);
-
-            const light1 = document.createElement('a-light');
-            light1.setAttribute('type', 'ambient');
-            light1.setAttribute('color', '#ffffff');
-            light1.setAttribute('intensity', '0.7');
-            sceneEl.appendChild(light1);
-
-            const light2 = document.createElement('a-light');
-            light2.setAttribute('type', 'directional');
-            light2.setAttribute('color', '#ffffff');
-            light2.setAttribute('intensity', '0.9');
-            light2.setAttribute('position', '0.5 1 1');
-            sceneEl.appendChild(light2);
-
-            const light3 = document.createElement('a-light');
-            light3.setAttribute('type', 'point');
-            light3.setAttribute('color', '#ff8888');
-            light3.setAttribute('intensity', '0.4');
-            light3.setAttribute('position', '0 0.5 0.5');
-            sceneEl.appendChild(light3);
-
-            document.getElementById('ar-container').appendChild(sceneEl);
-
-            sceneEl.addEventListener('mindar-face-loaded', function () {
-                console.log('MindAR Face Tracking загружен');
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
-                        .then(function (stream) {
-                            video.srcObject = stream;
-                            video.play().catch(function (e) {
-                                console.warn('Ошибка воспроизведения видео:', e);
-                            });
-                        })
-                        .catch(function (err) {
-                            console.error('Ошибка доступа к камере:', err);
-                            document.getElementById('error-message').style.display = 'block';
-                        });
-                } else {
-                    document.getElementById('error-message').style.display = 'block';
-                }
-            });
-
-            sceneEl.addEventListener('mindar-face-lost', function () {
-                console.log('Лицо потеряно');
-            });
-
-            sceneEl.addEventListener('mindar-face-found', function () {
-                console.log('Лицо найдено');
-            });
-
-            let smoothPos = new THREE.Vector3(0, 0.08, -0.02);
-            let smoothRot = new THREE.Euler(0, 0, 0);
-            let smoothScale = new THREE.Vector3(1, 1, 1);
-
-            function smoothUpdate() {
-                if (cube && cube.object3D) {
-                    const currentPos = cube.object3D.position;
-                    const currentRot = cube.object3D.rotation;
-                    const currentScale = cube.object3D.scale;
-
-                    smoothPos.lerp(currentPos, 0.35);
-                    smoothRot.x += (currentRot.x - smoothRot.x) * 0.35;
-                    smoothRot.y += (currentRot.y - smoothRot.y) * 0.35;
-                    smoothRot.z += (currentRot.z - smoothRot.z) * 0.35;
-                    smoothScale.lerp(currentScale, 0.35);
-
-                    cube.object3D.position.copy(smoothPos);
-                    cube.object3D.rotation.copy(smoothRot);
-                    cube.object3D.scale.copy(smoothScale);
-
-                    if (cubeGlow && cubeGlow.object3D) {
-                        cubeGlow.object3D.position.copy(smoothPos);
-                        cubeGlow.object3D.rotation.copy(smoothRot);
-                        cubeGlow.object3D.scale.copy(smoothScale);
-                    }
-                    if (cubeWire && cubeWire.object3D) {
-                        cubeWire.object3D.position.copy(smoothPos);
-                        cubeWire.object3D.rotation.copy(smoothRot);
-                        cubeWire.object3D.scale.copy(smoothScale);
-                    }
-                }
-                requestAnimationFrame(smoothUpdate);
-            }
-
-            setTimeout(() => {
-                smoothUpdate();
-            }, 1000);
-        });
-    </script>
+        </a-entity>
+    </a-scene>
 </body>
 </html>
