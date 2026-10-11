@@ -100,10 +100,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        .mindar-video-container video {
-            opacity: 0.001 !important;
-        }
     </style>
 
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -248,9 +244,19 @@
 
                 const videoEl = document.querySelector('video');
                 if (videoEl) {
+                    videoEl.setAttribute('playsinline', '');
+                    videoEl.setAttribute('webkit-playsinline', '');
+                    videoEl.style.opacity = '0.001';
+                    videoEl.style.pointerEvents = 'none';
+
                     videoEl.addEventListener('playing', function () {
                         loading.style.display = 'none';
                     });
+
+                    videoEl.play().catch(function (e) {
+                        console.warn('video.play() error:', e);
+                    });
+
                     setTimeout(function () {
                         loading.style.display = 'none';
                     }, 3000);
