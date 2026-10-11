@@ -1,39 +1,284 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>AR Маска</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        #startButton {
+            position: fixed;
+            z-index: 9999;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 18px 40px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 24px rgba(255, 65, 108, 0.5);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s ease;
+        }
+
+        #startButton:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        #errorScreen {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            color: #fff;
+            padding: 30px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        #errorScreen h2 {
+            color: #ff416c;
+            margin-top: 0;
+        }
+
+        #errorScreen code {
+            display: block;
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-size: 13px;
+            color: #7fffd4;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            z-index: 9998;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 18px;
+        }
+
+        #loading .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #ff416c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .mindar-video-container video {
+            opacity: 0.001 !important;
+        }
+    </style>
+
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
 </head>
 <body>
-    <a-scene mindar-face embedded color-space="sRGB"
-             renderer="colorManagement: true, physicallyCorrectLights"
+
+    <button id="startButton">Запустить AR</button>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>Загрузка AR...</div>
+    </div>
+
+    <div id="errorScreen">
+        <h2>Произошла ошибка</h2>
+        <div id="errorMessage"></div>
+    </div>
+
+    <a-scene id="arScene"
+             mindar-face embedded
+             color-space="sRGB"
+             renderer="colorManagement: true; physicallyCorrectLights: true"
              vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
-        
+             device-orientation-permission-ui="enabled: false"
+             loading-screen="enabled: false">
+
         <a-assets>
             <a-asset-item id="maskModel" src="japanese_demon_mask/scene.gltf"></a-asset-item>
-            
-            <a-asset-item id="headOccluder" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
+            <a-asset-item id="headOccluder"
+                          src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
         </a-assets>
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
-
         <a-entity mindar-face-target="anchorIndex: 10">
 
-            <a-gltf-model mindar-face-occluder 
-                          position="0 -0.3 0.15" 
-                          rotation="0 0 0" 
-                          scale="0.065 0.065 0.065" 
+            <a-gltf-model mindar-face-occluder
+                          position="0 -0.3 0.15"
+                          rotation="0 0 0"
+                          scale="0.065 0.065 0.065"
                           src="#headOccluder"></a-gltf-model>
 
-
-            <a-gltf-model rotation="0 93 10" 
-                          position="0.03 -1.2 -0.22" 
-                          scale="0.25 0.28 0.25" 
+            <a-gltf-model rotation="0 93 10"
+                          position="0.03 -1.2 -0.22"
+                          scale="0.25 0.28 0.25"
                           src="#maskModel"></a-gltf-model>
         </a-entity>
     </a-scene>
+
+    <script>
+        const errorScreen = document.getElementById('errorScreen');
+        const errorMessage = document.getElementById('errorMessage');
+        const startButton = document.getElementById('startButton');
+        const loading = document.getElementById('loading');
+
+        function showError(title, details) {
+            console.error(title, details);
+            errorScreen.style.display = 'block';
+            errorMessage.innerHTML = '<strong>' + title + '</strong>' +
+                (details ? '<code>' + String(details).replace(/</g, '&lt;') + '</code>' : '');
+        }
+
+        window.addEventListener('error', function (e) {
+            if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO')) {
+                showError('Не удалось загрузить ресурс', e.target.src);
+            }
+        }, true);
+
+        if (!window.isSecureContext) {
+            showError(
+                'Небезопасное соединение',
+                'Камера доступна только по HTTPS. Откройте сайт по адресу https://...'
+            );
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showError(
+                'Браузер не поддерживает камеру',
+                'navigator.mediaDevices.getUserMedia недоступен. Откройте страницу в Safari или Chrome.'
+            );
+        }
+
+        startButton.addEventListener('click', async function () {
+            startButton.style.display = 'none';
+            loading.style.display = 'flex';
+
+            try {
+                if (typeof DeviceMotionEvent !== 'undefined' &&
+                    typeof DeviceMotionEvent.requestPermission === 'function') {
+                    try {
+                        const motionPermission = await DeviceMotionEvent.requestPermission();
+                        console.log('DeviceMotion permission:', motionPermission);
+                        if (motionPermission !== 'granted') {
+                            showError(
+                                'Нет доступа к датчикам движения',
+                                'Разрешите доступ к движению и ориентации в настройках Safari.'
+                            );
+                            loading.style.display = 'none';
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn('Ошибка запроса DeviceMotion:', err);
+                    }
+                }
+
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'user',
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: false
+                    });
+                } catch (err) {
+                    let msg = 'Не удалось получить доступ к камере.';
+                    if (err.name === 'NotAllowedError') {
+                        msg = 'Доступ к камере запрещён. Разрешите его в настройках браузера.';
+                    } else if (err.name === 'NotFoundError') {
+                        msg = 'Фронтальная камера не найдена.';
+                    } else if (err.name === 'NotReadableError') {
+                        msg = 'Камера уже используется другим приложением.';
+                    }
+                    showError('Ошибка камеры', msg + ' (' + err.name + ': ' + err.message + ')');
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                stream.getTracks().forEach(function (t) { t.stop(); });
+
+                const sceneEl = document.querySelector('a-scene');
+
+                if (sceneEl && sceneEl.systems && sceneEl.systems['mindar-face-system']) {
+                    await sceneEl.systems['mindar-face-system'].start();
+                } else if (sceneEl && typeof sceneEl.startMindAR === 'function') {
+                    await sceneEl.startMindAR();
+                } else {
+                    console.log('MindAR: запуск через сцену');
+                }
+
+                const videoEl = document.querySelector('video');
+                if (videoEl) {
+                    videoEl.addEventListener('playing', function () {
+                        loading.style.display = 'none';
+                    });
+                    setTimeout(function () {
+                        loading.style.display = 'none';
+                    }, 3000);
+                } else {
+                    loading.style.display = 'none';
+                }
+
+            } catch (err) {
+                showError('Не удалось запустить AR', err.message || err);
+                loading.style.display = 'none';
+                startButton.style.display = 'block';
+            }
+        });
+
+        window.addEventListener('load', function () {
+            const sceneEl = document.querySelector('a-scene');
+            if (sceneEl && sceneEl.hasLoaded) {
+                console.log('A-Frame сцена загружена');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('a-asset-item').forEach(function (item) {
+                item.addEventListener('error', function (e) {
+                    showError('Не удалось загрузить модель', item.getAttribute('src'));
+                });
+            });
+        });
+    </script>
 </body>
 </html>
