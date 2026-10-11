@@ -1,78 +1,53 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>MindAR — AR-маска по лицу</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-        }
-        a-scene {
-            width: 100vw !important;
-            height: 100vh !important;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-        #hint {
-            position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 16px;
-            border-radius: 20px;
-            pointer-events: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MindAR — AR-маска по лицу</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    #hint {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="hint">Наведите камеру на лицо</div>
+  <div id="hint">Наведите камеру на лицо</div>
 
-    <a-scene mindar-face embedded color-space="sRGB"
-             mindar-face="filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5"
-             renderer="colorManagement: true, physicallyCorrectLights"
-             vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false"
-             loading-screen="enabled: false">
+  <a-scene
+    mindar-face
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+    <a-entity light="type: ambient; intensity: 1.2"></a-entity>
+    <a-entity light="type: directional; intensity: 1.5; position: 0 1 1"></a-entity>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-entity mindar-face-target="anchorIndex: 168">
+      <a-gltf-model
+        src="japanese_demon_mask.glb"
+        position="0.1 -0.32 0"
+        scale="2.5 2 2"
+        rotation="0 -5 -5">
+      </a-gltf-model>
+    </a-entity>
 
-        <a-entity light="type: ambient; intensity: 1.2"></a-entity>
-        <a-entity light="type: directional; intensity: 1.5; position: 0 1 1"></a-entity>
-
-        <a-assets>
-            <a-asset-item id="maskModel" src="japanese_demon_mask/scene.gltf"></a-asset-item>
-            <a-asset-item id="headOccluder" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/face-tracking/assets/sparkar/headOccluder.glb"></a-asset-item>
-        </a-assets>
-
-        <a-camera active="false" position="0 0 0"></a-camera>
-
-        <a-entity mindar-face-target="anchorIndex: 168">
-            <a-gltf-model mindar-face-occluder
-                          position="0 -0.3 0.15"
-                          rotation="0 0 0"
-                          scale="0.065 0.065 0.065"
-                          src="#headOccluder"></a-gltf-model>
-
-            <a-gltf-model rotation="0 93 10"
-                          position="0.03 -1.2 -0.22"
-                          scale="0.25 0.28 0.25"
-                          src="#maskModel"></a-gltf-model>
-        </a-entity>
-
-    </a-scene>
+  </a-scene>
 
 </body>
 </html>
