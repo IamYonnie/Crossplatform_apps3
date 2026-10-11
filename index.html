@@ -6,26 +6,28 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
     
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .a-scene {
+            width: 100vw !important;
+            height: 100vh !important;
+        }
         .a-scene video {
             width: 100vw !important;
             height: 100vh !important;
             left: 0 !important;
             top: 0 !important;
             position: absolute !important;
-        }
-        .a-scene {
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            object-fit: cover !important;
         }
     </style>
 </head>
 <body>
-    <a-scene mindar-face embedded color-space="sRGB"
+    <a-scene mindar-face="uiLoading: no; uiScanning: no; uiError: no"
+             embedded color-space="sRGB"
              renderer="colorManagement: true, physicallyCorrectLights"
              vr-mode-ui="enabled: false"
              fullscreen-ui="enabled: false"
@@ -48,13 +50,27 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var scene = document.querySelector('a-scene');
-            if (scene) {
-                scene.addEventListener('loaded', function() {
-                    setTimeout(function() {
-                        window.dispatchEvent(new Event('resize'));
-                    }, 500);
-                });
-            }
+            if (!scene) return;
+
+            var tryFixVideo = setInterval(function() {
+                var video = document.querySelector('a-scene video');
+                if (video) {
+                    video.style.setProperty('width', '100vw', 'important');
+                    video.style.setProperty('height', '100vh', 'important');
+                    video.style.setProperty('left', '0', 'important');
+                    video.style.setProperty('top', '0', 'important');
+                    video.style.setProperty('position', 'absolute', 'important');
+                    video.style.setProperty('object-fit', 'cover', 'important');
+                    clearInterval(tryFixVideo);
+                    console.log('Видео-стили применены принудительно');
+                }
+            }, 200);
+
+            scene.addEventListener('loaded', function() {
+                setTimeout(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 500);
+            });
         });
     </script>
 </body>
