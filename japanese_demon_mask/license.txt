@@ -1,0 +1,11 @@
+Model Information:
+* title:	Japanese demon mask
+* source:	https://sketchfab.com/3d-models/japanese-demon-mask-da21beea26034da9b889ec075bec6207
+* author:	Eques_inferno (https://sketchfab.com/Eques_inferno)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Japanese demon mask" (https://sketchfab.com/3d-models/japanese-demon-mask-da21beea26034da9b889ec075bec6207) by Eques_inferno (https://sketchfab.com/Eques_inferno) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
