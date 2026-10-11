@@ -11,6 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #000;
         }
         a-scene {
             width: 100vw !important;
@@ -19,13 +20,23 @@
             top: 0;
             left: 0;
         }
+        video {
+            object-fit: cover !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
     </style>
 </head>
 <body>
     <a-scene mindar-face embedded color-space="sRGB"
+             mindar-face="filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5"
              renderer="colorManagement: true, physicallyCorrectLights"
              vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
+             device-orientation-permission-ui="enabled: false"
+             loading-screen="enabled: false">
         
         <a-assets>
             <a-asset-item id="maskModel" src="japanese_demon_mask/scene.gltf"></a-asset-item>
