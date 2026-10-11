@@ -11,7 +11,6 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #000;
         }
         a-scene {
             width: 100vw !important;
@@ -24,10 +23,9 @@
 </head>
 <body>
     <a-scene mindar-face embedded color-space="sRGB"
-             renderer="colorManagement: true, physicallyCorrectLights; antialias: true"
+             renderer="colorManagement: true, physicallyCorrectLights"
              vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false"
-             loading-screen="enabled: false">
+             device-orientation-permission-ui="enabled: false">
         
         <a-assets>
             <a-asset-item id="maskModel" src="japanese_demon_mask/scene.gltf"></a-asset-item>
@@ -36,29 +34,18 @@
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
-        <a-entity mindar-face-target="anchorIndex: 168">
+        <a-entity mindar-face-target="anchorIndex: 10">
             <a-gltf-model mindar-face-occluder 
                           position="0 -0.3 0.15" 
                           rotation="0 0 0" 
                           scale="0.065 0.065 0.065" 
                           src="#headOccluder"></a-gltf-model>
 
-            <a-gltf-model rotation="0 0 0" 
-                          position="0 0 0" 
-                          scale="1 1 1" 
+            <a-gltf-model rotation="0 93 10" 
+                          position="0.03 -1.2 -0.22" 
+                          scale="0.25 0.28 0.25" 
                           src="#maskModel"></a-gltf-model>
         </a-entity>
     </a-scene>
-
-    <script>
-        window.addEventListener('resize', () => {
-            const video = document.querySelector('video');
-            if (video) {
-                video.style.width = '100%';
-                video.style.height = '100%';
-                video.style.objectFit = 'cover';
-            }
-        });
-    </script>
 </body>
 </html>
