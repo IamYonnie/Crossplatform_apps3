@@ -1,194 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#171017">
-  <title>Oni Mask | MindAR Face Tracking</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MindAR — AR-маска по лицу</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: #171017; color: white; }
-    #ar-container { position: fixed; inset: 0; overflow: hidden; }
-    .ui { position: fixed; z-index: 10; pointer-events: none; }
-    header { top: max(18px, env(safe-area-inset-top)); left: 18px; right: 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .branding { border-radius: 14px; padding: 11px 15px; background: rgba(19, 12, 20, .73); backdrop-filter: blur(12px); }
-    .branding b { display: block; letter-spacing: .14em; font-size: 13px; }
-    #status { margin-top: 5px; font-size: 12px; line-height: 1.4; color: #e8dce3; max-width: 230px; }
-    button { pointer-events: auto; cursor: pointer; border: 1px solid rgba(255,255,255,.21); border-radius: 12px; background: rgba(32, 19, 28, .86); color: #fff; padding: 11px 13px; font: inherit; font-size: 12px; backdrop-filter: blur(10px); }
-    button:hover { background: rgba(63, 31, 43, .92); }
-    #panel { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); width: min(330px, calc(100vw - 28px)); max-height: min(70vh, 620px); overflow-y: auto; pointer-events: auto; padding: 18px; border-radius: 18px; background: rgba(25, 18, 26, .92); box-shadow: 0 10px 32px rgba(0,0,0,.32); backdrop-filter: blur(14px); }
-    #panel[hidden] { display: none; }
-    #panel h2 { font-size: 15px; margin: 0 0 8px; }
-    #panel p { font-size: 12px; color: #d2bfc8; line-height: 1.45; margin: 0 0 12px; }
-    .control { margin: 12px 0; }
-    .control label { display: flex; justify-content: space-between; font-size: 12px; gap: 10px; }
-    .control output { font-variant-numeric: tabular-nums; color: #f4b9c5; }
-    input[type=range] { width: 100%; margin-top: 7px; accent-color: #e6657f; }
-    .actions { display: flex; gap: 8px; margin-top: 13px; }
-    .actions button { flex: 1; }
-    .hint { left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(90%, 380px); text-align: center; padding: 10px 13px; font-size: 12px; color: #fff; background: rgba(19,12,20,.60); border-radius: 20px; }
-    body:has(#panel:not([hidden])) .hint { display: none; }
+    body { margin: 0; overflow: hidden; background: #000; }
+    #hint {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
+      pointer-events: none;
+    }
   </style>
-
-  <script>
-    // 3D-модель может иметь любой исходный масштаб.
-    // Этот компонент центрирует её и задаёт начальную ширину в системе MindAR.
-    AFRAME.registerComponent('fit-demon-mask', {
-      init: function () {
-        this.el.addEventListener('model-loaded', () => {
-          const THREE = AFRAME.THREE;
-          const model = this.el.getObject3D('mesh');
-          if (!model) return;
-
-          // Клон без родительской матрицы: координаты лица не искажают расчёт размеров.
-          const bounds = new THREE.Box3().setFromObject(model.clone());
-          const size = bounds.getSize(new THREE.Vector3());
-          const center = bounds.getCenter(new THREE.Vector3());
-          if (!Number.isFinite(size.x) || size.x < 0.000001) {
-            this.el.emit('maskFitError');
-            return;
-          }
-
-          // Сдвигаем центр геометрии в начало координат модели.
-          model.position.sub(center);
-          // Начальная ширина 1.4 единицы. При необходимости меняется ползунком.
-          const baseScale = 1.4 / size.x;
-          this.el.emit('maskPrepared', {baseScale});
-        });
-      }
-    });
-  </script>
 </head>
 <body>
-  <div id="ar-container">
-    <a-scene
-      mindar-face="autoStart: true; faceOccluder: false; filterMinCF: 0.001; filterBeta: 1"
-      embedded
-      color-space="sRGB"
-      renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false">
 
-      <a-assets timeout="30000">
-        <!-- GLB лежит в той же папке, что и index.html -->
-        <a-asset-item id="maskAsset" src="./japanese_demon_mask.glb"></a-asset-item>
-      </a-assets>
+  <a-scene
+    mindar-face
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+    <a-entity light="type: ambient; intensity: 1.2"></a-entity>
+    <a-entity light="type: directional; intensity: 1.5; position: 0 1 1"></a-entity>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-entity mindar-face-target="anchorIndex: 168">
+      <a-gltf-model
+        src="japanese_demon_mask.glb"
+        position="0.03 -0.85 -0.22"
+        scale="0.25 0.28 0.28"
+        rotation="0 93 10">
+      </a-gltf-model>
+    </a-entity>
 
-      <a-camera active="false" position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-light type="ambient" intensity="1.1"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="1.1" position="1 2 3"></a-light>
+  </a-scene>
 
-      <!-- Landmark 168: область переносицы / центр верхней части лица -->
-      <a-entity mindar-face-target="anchorIndex: 168">
-        <a-gltf-model id="demonMask" src="#maskAsset" fit-demon-mask position="0 -0.35 0.25"></a-gltf-model>
-      </a-entity>
-    </a-scene>
-  </div>
-
-  <header class="ui">
-    <div class="branding">
-      <b>ONI FACE AR</b>
-      <div id="status" role="status" aria-live="polite">Загрузка камеры и 3D-модели...</div>
-    </div>
-    <button id="settingsButton" type="button" aria-expanded="false" aria-controls="panel">Настройки</button>
-  </header>
-
-  <div id="hint" class="hint ui">Посмотри в камеру и плавно поверни голову</div>
-
-  <aside id="panel" class="ui" hidden>
-    <h2>Подгонка маски</h2>
-    <p>Отрегулируй маску на своём лице. Если модель смотрит обратной стороной, поверни её по оси Y на 180°.</p>
-    <div class="control"><label for="zoom">Размер <output id="out-zoom"></output></label><input type="range" id="zoom" min="0.3" max="3" step="0.05" value="1"></div>
-    <div class="control"><label for="x">Смещение вправо / влево <output id="out-x"></output></label><input type="range" id="x" min="-1.5" max="1.5" step="0.05" value="0"></div>
-    <div class="control"><label for="y">Смещение вверх / вниз <output id="out-y"></output></label><input type="range" id="y" min="-1.5" max="1.5" step="0.05" value="-0.35"></div>
-    <div class="control"><label for="z">Удаление от лица <output id="out-z"></output></label><input type="range" id="z" min="-1.5" max="1.5" step="0.05" value="0.25"></div>
-    <div class="control"><label for="yaw">Поворот Y <output id="out-yaw"></output></label><input type="range" id="yaw" min="0" max="360" step="5" value="0"></div>
-    <div class="control"><label for="pitch">Поворот X <output id="out-pitch"></output></label><input type="range" id="pitch" min="-180" max="180" step="5" value="0"></div>
-    <div class="actions">
-      <button id="resetButton" type="button">Сбросить</button>
-      <button id="copyButton" type="button">Копировать параметры</button>
-    </div>
-  </aside>
-
-  <script>
-    const scene = document.querySelector('a-scene');
-    const mask = document.getElementById('demonMask');
-    const status = document.getElementById('status');
-    const panel = document.getElementById('panel');
-    const settingsButton = document.getElementById('settingsButton');
-    const defaults = { zoom: 1, x: 0, y: -0.35, z: 0.25, yaw: 0, pitch: 0 };
-    let baseScale = null;
-    let maskLoaded = false;
-
-    const values = () => Object.fromEntries(
-      Object.keys(defaults).map(key => [key, Number(document.getElementById(key).value)])
-    );
-
-    function applySettings() {
-      const v = values();
-      for (const key of Object.keys(defaults)) {
-        document.getElementById('out-' + key).textContent = v[key].toFixed(key === 'yaw' || key === 'pitch' ? 0 : 2);
-      }
-      if (baseScale === null) return;
-      const scale = baseScale * v.zoom;
-      mask.setAttribute('scale', `${scale} ${scale} ${scale}`);
-      mask.setAttribute('position', `${v.x} ${v.y} ${v.z}`);
-      mask.setAttribute('rotation', `${v.pitch} ${v.yaw} 0`);
-    }
-
-    Object.keys(defaults).forEach(key => {
-      document.getElementById(key).addEventListener('input', applySettings);
-    });
-
-    mask.addEventListener('maskPrepared', event => {
-      baseScale = event.detail.baseScale;
-      maskLoaded = true;
-      applySettings();
-      status.textContent = 'Модель загружена. Найди лицо в кадре.';
-    });
-    mask.addEventListener('maskFitError', () => {
-      status.textContent = 'Не удалось определить размер GLB-модели.';
-    });
-    mask.addEventListener('model-error', () => {
-      status.textContent = 'Ошибка загрузки japanese_demon_mask.glb. Проверь путь и имя файла.';
-    });
-    scene.addEventListener('arReady', () => {
-      if (!maskLoaded) status.textContent = 'Камера готова. Загрузка маски...';
-    });
-    scene.addEventListener('targetFound', () => {
-      status.textContent = maskLoaded ? 'Лицо обнаружено. Маска отслеживается.' : 'Лицо обнаружено. Ожидание модели...';
-    });
-    scene.addEventListener('targetLost', () => {
-      status.textContent = 'Лицо потеряно. Вернись в кадр.';
-    });
-    scene.addEventListener('arError', () => {
-      status.textContent = 'Камера недоступна. Разреши доступ и открой сайт по HTTPS.';
-    });
-
-    settingsButton.addEventListener('click', () => {
-      panel.hidden = !panel.hidden;
-      settingsButton.setAttribute('aria-expanded', String(!panel.hidden));
-      settingsButton.textContent = panel.hidden ? 'Настройки' : 'Закрыть';
-    });
-    document.getElementById('resetButton').addEventListener('click', () => {
-      for (const [key, value] of Object.entries(defaults)) document.getElementById(key).value = value;
-      applySettings();
-    });
-    document.getElementById('copyButton').addEventListener('click', async () => {
-      const button = document.getElementById('copyButton');
-      const text = JSON.stringify(values(), null, 2);
-      try {
-        await navigator.clipboard.writeText(text);
-        button.textContent = 'Скопировано';
-      } catch (error) {
-        button.textContent = 'Не удалось скопировать';
-      }
-    });
-    applySettings();
-  </script>
 </body>
 </html>
