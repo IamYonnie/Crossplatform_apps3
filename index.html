@@ -2,64 +2,46 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>AR — примерка демонической маски</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MindAR — AR-маска по лицу</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background-color: #000;
-    }
-
-    #tip {
-      position: absolute;
-      top: 14px;
+    body { margin: 0; overflow: hidden; background: #000; }
+    #hint {
+      position: fixed;
+      top: 12px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 10;
-      padding: 7px 15px;
+      z-index: 1000;
+      color: #fff;
       font-family: Arial, sans-serif;
-      font-size: 13px;
-      color: #f2f2f2;
-      background: rgba(0, 0, 0, 0.55);
-      border-radius: 18px;
-      white-space: nowrap;
+      font-size: 14px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
       pointer-events: none;
-      user-select: none;
     }
   </style>
 </head>
 <body>
 
-  <div id="tip">Наведите камеру на лицо</div>
-
   <a-scene
     mindar-face
     color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    renderer="colorManagement: true; physicallyCorrectLights: true">
-
-    <!-- Освещение -->
+    device-orientation-permission-ui="enabled: false">
     <a-entity light="type: ambient; intensity: 1.2"></a-entity>
     <a-entity light="type: directional; intensity: 1.5; position: 0 1 1"></a-entity>
-
-    <!-- Камера -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <!-- Якорь 168 - центр лица -->
     <a-entity mindar-face-target="anchorIndex: 168">
       <a-gltf-model
         src="japanese_demon_mask.glb"
         position="0.03 -0.85 -0.22"
-        rotation="0 93 10"
-        scale="0.25 0.28 0.28">
+        scale="0.25 0.28 0.28"
+        rotation="0 93 10">
       </a-gltf-model>
     </a-entity>
 
